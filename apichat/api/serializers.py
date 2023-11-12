@@ -66,15 +66,11 @@ class MessageSerializer(serializers.ModelSerializer):
 class ChatSerializer(serializers.ModelSerializer):
     recipient = UserSerializer()
     sender = UserSerializer()
-    messages_count = serializers.SerializerMethodField()
+    messages_count = serializers.IntegerField(source='message.count', read_only=True)
 
     class Meta:
         model = Chat
         fields = ('id', 'recipient', 'sender', 'created_at', 'messages_count')
-
-    @staticmethod
-    def get_messages_count(chat):
-        return chat.message.count()
 
 
 class ChatCreateSerializer(serializers.ModelSerializer):
@@ -93,26 +89,21 @@ class ChatCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user = self.context['request'].user
-        recipient_id = data['recipient'].id  # Обращение к полю recipient для получения id
-
+        recipient_id = data['recipient'].id
         # Проверка: Нельзя создать чат с самим собой
         if user.id == recipient_id:
             raise serializers.ValidationError("Нельзя создать чат с самим собой")
-
         # Проверка: Нельзя создать чат с несуществующим пользователем
         try:
             User.objects.get(id=recipient_id)
         except User.DoesNotExist:
             raise serializers.ValidationError("Такого пользователя не существует")
-
         # Устанавливаем текущего пользователя в качестве отправителя (sender)
         data['sender'] = user
-
         return data
 
     @atomic
     def create(self, validated_data):
-        # sender уже установлен в методе validate, не нужно его повторно получать
         recipient = validated_data['recipient']
         chat = Chat.objects.create(sender=validated_data['sender'], recipient=recipient)
         return chat
