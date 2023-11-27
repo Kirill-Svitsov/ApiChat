@@ -39,6 +39,7 @@ class ChatViewSetTests(BaseTest):
     url = '/api/v1/chats/'
 
     def test_create_chat(self):
+        """Тесты на создание чатов"""
         first_data = {'recipient': self.user1.id}
         second_data = {'recipient': self.user2.id}
         third_data = {'recipient': self.user3.id}
@@ -60,6 +61,7 @@ class ChatViewSetTests(BaseTest):
         self.assertEqual(fifth_response.status_code, status.HTTP_201_CREATED)
 
     def test_get_chats(self):
+        """Тесты на получение чатов"""
         # Получение своих чатов user1
         first_response = self.client_user1.get(self.url)
         self.assertEqual(first_response.status_code, status.HTTP_200_OK)
@@ -74,6 +76,7 @@ class ChatViewSetTests(BaseTest):
         self.assertEqual(anonymous_response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_chat_by_id(self):
+        """Тесты на получение чата по id"""
         # Создаем чат между user1 и user2
         chat = self.client_user1.post(
             self.url,
@@ -92,6 +95,7 @@ class ChatViewSetTests(BaseTest):
         self.assertEqual(third_response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_send_message(self):
+        """Тесты на отправление и проверку содержимого сообщений"""
         # Создаем чат между user1 и user2
         chat = self.client_user1.post(
             self.url,
