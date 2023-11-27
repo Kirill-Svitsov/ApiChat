@@ -27,6 +27,7 @@ class ChatViewSet(viewsets.ModelViewSet):
     pagination_class = pagination.ChatsPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = custom_filters.ChatFilter
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         """Получение чатов, в которых присутствует Юзер"""
@@ -151,7 +152,6 @@ class ChatViewSet(viewsets.ModelViewSet):
 class UserViewSet(DjoserUserViewSet):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
-    permission_classes = IsAuthenticatedOrReadOnly
     pagination_class = pagination.UsersPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = custom_filters.UserFilter

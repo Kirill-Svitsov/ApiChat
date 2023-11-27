@@ -90,14 +90,23 @@ class ChatCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
         recipient_id = data['recipient'].id
+        # Проверка создать уже существующий чат
+        if Chat.objects.filter(
+                sender=user,
+                recipient=recipient_id
+        ).exists() or Chat.objects.filter(
+            sender=recipient_id,
+            recipient=user
+        ).exists():
+            raise serializers.ValidationError('Такой чат уже существует')
         # Проверка: Нельзя создать чат с самим собой
         if user.id == recipient_id:
-            raise serializers.ValidationError("Нельзя создать чат с самим собой")
+            raise serializers.ValidationError('Нельзя создать чат с самим собой')
         # Проверка: Нельзя создать чат с несуществующим пользователем
         try:
             User.objects.get(id=recipient_id)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Такого пользователя не существует")
+            raise serializers.ValidationError('Такого пользователя не существует')
         # Устанавливаем текущего пользователя в качестве отправителя (sender)
         data['sender'] = user
         return data
